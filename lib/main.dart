@@ -1,7 +1,8 @@
-import 'dart:ffi';
+// import 'dart:ffi';
 
-import 'package:english_words/english_words.dart';
+// import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
+import 'package:math_expressions/math_expressions.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,11 +15,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'MY ADVANCED CALCULATOR',
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
-      home: const MyHomePage(title: 'EUNIC STORE'),
+      home: const MyHomePage(title: 'MY ADVANCED CALCULATOR'),
     );
   }
 }
@@ -32,52 +33,146 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  double _result = 0.0;
+  String _result = '0';
   String symbol = '';
   double num1 = 0.0;
   double num2 = 0.0;
-  void _setNumber1(){
+  List <String> enteredNumber = [];
+  String numbers = '0';
+  Color bgThemeColor = const Color.fromRGBO(174, 155, 229, 0.8);
+  Color themeNumberButtons = const Color.fromRGBO(109, 37, 166,1);
+  Color themeTopSymbolButtons = const Color.fromRGBO(161, 93, 215, 1);
+  Color themeSideSymbolButtons = const Color.fromRGBO(241, 23, 115, 1);
+  Color themeValues = const Color.fromRGBO(64,59,59, 1);
+  Color themeResult = Colors.black;
+
+  void setLightBackgroundColor(){
     setState(() {
-      num1 = 5;
+      bgThemeColor = const Color.fromRGBO(174, 155, 229, 0.8) ;
+      themeNumberButtons = const Color.fromRGBO(109, 37, 166,1);
+      themeTopSymbolButtons = const Color.fromRGBO(161, 93, 215, 1);
+      themeSideSymbolButtons = const Color.fromRGBO(241, 23, 115, 1);
+      themeValues = const Color.fromRGBO(64,59,59, 1);
+      themeResult = Colors.black;
     });
   }
-  void _setNumber2(){
+
+  void setDarkBackgroundColor(){
     setState(() {
-      num2 = 10;
+      bgThemeColor = const Color.fromRGBO(9, 12, 16, 0.8) ;
+      themeNumberButtons = const Color.fromRGBO(33,57,181, 0.8);
+      themeTopSymbolButtons = const Color.fromRGBO(54, 56, 113, 1);
+      themeSideSymbolButtons = const Color.fromRGBO(211, 114, 44, 1);
+      themeValues = const Color.fromRGBO(136,117,130, 1);
+      themeResult = Colors.white;
     });
   }
-  void _setSymbol(){
+
+  void _setNumber(String value){
     setState(() {
-      symbol = '+';
+      enteredNumber.add(value);
+      processEnteredNumbers(enteredNumber);
     });
   }
-  void _calculate(){
-    double innerResult = 0.0;
-    switch(symbol){
+
+  void _clearValues(){
+    setState(() {
+      enteredNumber.clear();
+      processEnteredNumbers(enteredNumber);
+    });
+  }
+
+  void processEnteredNumbers(List<String> myNumbers){
+    if(myNumbers.isNotEmpty){
+      setState(() {
+        numbers = enteredNumber.join("");
+        // _result = '0';
+        // _calculate();
+      });
+    }
+    else{
+      setState(() {
+        numbers = '0';
+        _result = '0';
+      });
+    }
+  }
+
+  void _deleteValues(){
+    setState(() {
+      enteredNumber.removeLast();
+      processEnteredNumbers(enteredNumber);
+    });
+  }
+
+  void _setSymbol(sym){
+    switch(sym){
       case '+':{
-        innerResult = num1 + num2;
+        setState(() {
+          enteredNumber.add(sym);
+          processEnteredNumbers(enteredNumber);
+        });
       }
       break;
       case '-':{
-        innerResult = num1 - num2;
+        setState(() {
+          enteredNumber.add(sym);
+          processEnteredNumbers(enteredNumber);
+        });
       }
       break;
       case 'x':{
-        innerResult = num1 * num2;
+        setState(() {
+          enteredNumber.add('*');
+          processEnteredNumbers(enteredNumber);
+        });
       }
       break;
       case '/':{
-        innerResult = num1 / num2;
+        setState(() {
+          enteredNumber.add(sym);
+          processEnteredNumbers(enteredNumber);
+        });
       }
       break;
-      default:{
-        innerResult = 0.0;
+      case '%':{
+        setState(() {
+          enteredNumber.add(sym);
+          processEnteredNumbers(enteredNumber);
+        });
       }
       break;
+      case 'C':
+        {
+          _clearValues();
+        }
+        break;
+
     }
-    setState(() {
-      _result = innerResult;
-    });
+
+  }
+  void updateTotalToEnteredNumbers(String evaluation){
+    enteredNumber.clear();
+    enteredNumber.add(evaluation);
+    processEnteredNumbers(enteredNumber);
+  }
+  void _calculate(){
+      if(enteredNumber.isNotEmpty){
+        Parser p = Parser();
+        Expression exp = p.parse(numbers);
+        ContextModel cm = ContextModel();
+        double eval = exp.evaluate(EvaluationType.REAL,cm);
+        setState(() {
+          _result  = eval.toStringAsFixed(3);
+          updateTotalToEnteredNumbers(_result);
+        });
+      }
+      else
+        {
+          setState(() {
+            _result = '0';
+          });
+        }
   }
 
 
@@ -85,60 +180,68 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const  Color.fromRGBO(174, 155, 229, 0.8),
+      backgroundColor: bgThemeColor,
       body: Container(
         padding: const EdgeInsets.all(20),
-        margin: const EdgeInsets.only(top: 200),
+        margin: const EdgeInsets.only(top: 50),
         child: Column(
           children: [
+            Center(
 
-            Row(
+              child:  Column(
+                // mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
+                      children:[
+                        IconButton(
+                            onPressed: setLightBackgroundColor,
+                            icon: const Icon(Icons.light_mode),
+                            color: Colors.white,
+
+                        ),
+                        IconButton(
+                            onPressed: setDarkBackgroundColor,
+                            icon: const Icon(Icons.dark_mode),
+                            color : Colors.white,
+                        )
+                      ]
+                  )
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 100),
+            Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Column(
-                  children: [
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Text(
-                          num1.toString(),
-                          style: const TextStyle(
+                          numbers,
+                          style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: Color.fromRGBO(64, 59, 59, 1)
+                            color: themeValues
                           ),
                         ),
-                        Text(symbol,
-                          style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Color.fromRGBO(64, 59, 59, 1)
-                          ),
-                        ),
-                        Text(num2.toString(),
-                          style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Color.fromRGBO(64, 59, 59, 1)
-                          ),
-                        ),
+
                       ],
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Text(_result.toString(),
-                          style: const TextStyle(
+                        Text(
+                          _result,
+                          style: TextStyle(
                             fontSize: 40,
                             fontWeight: FontWeight.bold,
-                            color: Color.fromRGBO(0, 0, 0, 1)
+                            color: themeResult
                           ),
                         ),
                       ],
 
                     )
-                  ],
-                ),
-
 
               ],
             ),
@@ -147,7 +250,7 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Row(
                 children: <Widget>[
                   Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -156,38 +259,38 @@ class _MyHomePageState extends State<MyHomePage> {
                             style: TextButton.styleFrom(
                                 textStyle: const TextStyle(fontSize: 20),
                                 primary: Colors.white,
-                                backgroundColor: const Color.fromRGBO(109, 37, 166, 1),
+                                backgroundColor: themeTopSymbolButtons,
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10),
 
                                 ),
                               minimumSize: const Size(70, 70)
                             ),
-                            onPressed: _setNumber1,
-                            child: const Text('5'),
+                            onPressed: () => _setSymbol("C"),
+                            child: const Text('C'),
 
                           ),
-                          const SizedBox(width: 15),
+                          const SizedBox(width: 10),
                           TextButton(
                             style: TextButton.styleFrom(
                                 textStyle: const TextStyle(fontSize: 20),
                                 primary: Colors.white,
-                                backgroundColor: const Color.fromRGBO(109, 37, 166, 1),
+                                backgroundColor: themeTopSymbolButtons,
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10)
                                 ),
                                 minimumSize: const Size(70, 70)
                             ),
-                            onPressed: _setNumber2,
-                            child: const Text('10'),
+                            onPressed: () => _setSymbol("+/-"),
+                            child: const Text('+/-'),
                           ),
-                          const SizedBox(width: 15),
+                          const SizedBox(width: 10),
                           TextButton(
 
                             style: TextButton.styleFrom(
                                 textStyle: const TextStyle(fontSize: 20),
                                 primary: Colors.white,
-                                backgroundColor: const Color.fromRGBO(109, 37, 166, 1),
+                                backgroundColor: themeTopSymbolButtons,
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10)
                                 ),
@@ -196,11 +299,27 @@ class _MyHomePageState extends State<MyHomePage> {
 
                             ),
 
-                            onPressed: _setNumber2,
-                            child: const Text('10'),
+                            onPressed: () => _setSymbol("%"),
+                            child: const Text('%'),
                           ),
+                          const SizedBox(width: 10),
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              textStyle: const TextStyle(fontSize: 20),
+                              primary: Colors.white,
+                              backgroundColor: themeSideSymbolButtons,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)
+                              ),
+                              minimumSize: const Size(70,70),
+                            ),
+                            onPressed: () => _setSymbol("/"),
+                            child: const Text('/'),
+                          ),
+
                         ],
                       ),
+                      const SizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
@@ -208,47 +327,62 @@ class _MyHomePageState extends State<MyHomePage> {
                             style: TextButton.styleFrom(
                                 textStyle: const TextStyle(fontSize: 20),
                                 primary: Colors.white,
-                                backgroundColor: const Color.fromRGBO(109, 37, 166, 1),
+                                backgroundColor: themeNumberButtons,
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10)
                                 ),
                               minimumSize: const Size(70, 70),
                             ),
-                            onPressed: _setNumber1,
-                            child: const Text('5'),
+
+                            onPressed: () => _setNumber('7'),
+                            child: const Text('7'),
 
                           ),
-                          const SizedBox(width: 15),
+                          const SizedBox(width: 10),
                           TextButton(
                             style: TextButton.styleFrom(
                                 textStyle: const TextStyle(fontSize: 20),
                                 primary: Colors.white,
-                                backgroundColor: const Color.fromRGBO(109, 37, 166, 1),
+                                backgroundColor: themeNumberButtons,
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10)
                                 ),
                               minimumSize: const Size(70, 70),
                             ),
-                            onPressed: _setNumber2,
-                            child: const Text('10'),
+                            onPressed: () => _setNumber('7'),
+                            child: const Text('8'),
                           ),
-                          const SizedBox(width: 15),
+                          const SizedBox(width: 10),
                           TextButton(
                             style: TextButton.styleFrom(
                                 textStyle: const TextStyle(fontSize: 20),
                                 primary: Colors.white,
-                                backgroundColor: const Color.fromRGBO(109, 37, 166, 1),
+                                backgroundColor: themeNumberButtons,
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10)
                                 ),
                               minimumSize: const Size(70, 70),
                             ),
-                            onPressed: _setNumber2,
-                            child: const Text('10'),
+                            onPressed: () => _setNumber('9'),
+                            child: const Text('9'),
+                          ),
+                          const SizedBox(width: 10),
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              textStyle: const TextStyle(fontSize: 20),
+                              primary: Colors.white,
+                              backgroundColor: themeSideSymbolButtons,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)
+                              ),
+                              minimumSize: const Size(70,70),
+                            ),
+                            onPressed: () => _setSymbol("x"),
+                            child: const Text('x'),
                           ),
                         ],
                       ),
-
+                      const SizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
@@ -256,47 +390,61 @@ class _MyHomePageState extends State<MyHomePage> {
                             style: TextButton.styleFrom(
                                 textStyle: const TextStyle(fontSize: 20),
                                 primary: Colors.white,
-                                backgroundColor: const Color.fromRGBO(109, 37, 166, 1),
+                                backgroundColor: themeNumberButtons,
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10)
                                 ),
                               minimumSize: const Size(70, 70),
                             ),
-                            onPressed: _setNumber1,
-                            child: const Text('5'),
+                            onPressed: () => _setNumber('4'),
+                            child: const Text('4'),
 
                           ),
-                          const SizedBox(width: 15),
+                          const SizedBox(width: 10),
                           TextButton(
                             style: TextButton.styleFrom(
                                 textStyle: const TextStyle(fontSize: 20),
                                 primary: Colors.white,
-                                backgroundColor: const Color.fromRGBO(109, 37, 166, 1),
+                                backgroundColor: themeNumberButtons,
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10)
                                 ),
                               minimumSize: const Size(70,70),
                             ),
-                            onPressed: _setNumber2,
-                            child: const Text('10'),
+                            onPressed:() => _setNumber('5'),
+                            child: const Text('5'),
                           ),
-                          const SizedBox(width: 15),
+                          const SizedBox(width: 10),
                           TextButton(
                             style: TextButton.styleFrom(
                                 textStyle: const TextStyle(fontSize: 20),
                                 primary: Colors.white,
-                                backgroundColor: const Color.fromRGBO(109, 37, 166, 1),
+                                backgroundColor: themeNumberButtons,
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10)
                                 ),
                               minimumSize: const Size(70,70),
                             ),
-                            onPressed: _setNumber2,
-                            child: const Text('10'),
+                            onPressed: () => _setNumber('6'),
+                            child: const Text('6'),
+                          ),
+                          const SizedBox(width: 10),
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              textStyle: const TextStyle(fontSize: 20),
+                              primary: Colors.white,
+                              backgroundColor: themeSideSymbolButtons,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)
+                              ),
+                              minimumSize: const Size(70,70),
+                            ),
+                            onPressed: () => _setSymbol("-"),
+                            child: const Text('-'),
                           ),
                         ],
                       ),
-
+                      const SizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
@@ -304,46 +452,61 @@ class _MyHomePageState extends State<MyHomePage> {
                             style: TextButton.styleFrom(
                                 textStyle: const TextStyle(fontSize: 20),
                                 primary: Colors.white,
-                                backgroundColor: const Color.fromRGBO(109, 37, 166, 1),
+                                backgroundColor: themeNumberButtons,
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10)
                                 ),
                               minimumSize: const Size(70,70),
                             ),
-                            onPressed: _setNumber1,
-                            child: const Text('5'),
+                            onPressed: () => _setNumber('1'),
+                            child: const Text('1'),
 
                           ),
-                          const SizedBox(width: 15),
+                          const SizedBox(width: 10),
                           TextButton(
                             style: TextButton.styleFrom(
                                 textStyle: const TextStyle(fontSize: 20),
                                 primary: Colors.white,
-                                backgroundColor: const Color.fromRGBO(109, 37, 166, 1),
+                                backgroundColor: themeNumberButtons,
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10)
                                 ),
                               minimumSize: const Size(70,70),
                             ),
-                            onPressed: _setNumber2,
-                            child: const Text('10'),
+                            onPressed: () => _setNumber('2'),
+                            child: const Text('2'),
                           ),
-                          const SizedBox(width: 15),
+                          const SizedBox(width: 10),
                           TextButton(
                             style: TextButton.styleFrom(
                                 textStyle: const TextStyle(fontSize: 20),
                                 primary: Colors.white,
-                                backgroundColor: const Color.fromRGBO(109, 37, 166, 1),
+                                backgroundColor: themeNumberButtons,
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10)
                                 ),
                               minimumSize: const Size(70,70),
                             ),
-                            onPressed: _setNumber2,
-                            child: const Text('10'),
+                            onPressed: () => _setNumber('3'),
+                            child: const Text('3'),
+                          ),
+                          const SizedBox(width: 10),
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              textStyle: const TextStyle(fontSize: 20),
+                              primary: Colors.white,
+                              backgroundColor: themeSideSymbolButtons,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)
+                              ),
+                              minimumSize: const Size(70,70),
+                            ),
+                            onPressed: () => _setSymbol("+"),
+                            child: const Text('+'),
                           ),
                         ],
                       ),
+                      const SizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
@@ -351,124 +514,65 @@ class _MyHomePageState extends State<MyHomePage> {
                             style: TextButton.styleFrom(
                                 textStyle: const TextStyle(fontSize: 20),
                                 primary: Colors.white,
-                                backgroundColor: const Color.fromRGBO(109, 37, 166, 1),
+                                backgroundColor: themeNumberButtons,
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10)
                                 ),
                               minimumSize: const Size(70,70),
                             ),
-                            onPressed: _setNumber1,
-                            child: const Text('5'),
+                            onPressed: () => _setNumber('0'),
+                            child: const Text('0'),
 
                           ),
-                          const SizedBox(width: 15),
+                          const SizedBox(width: 10),
                           TextButton(
                             style: TextButton.styleFrom(
                                 textStyle: const TextStyle(fontSize: 20),
                                 primary: Colors.white,
-                                backgroundColor: const Color.fromRGBO(109, 37, 166, 1),
+                                backgroundColor: themeNumberButtons,
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10)
                                 ),
                               minimumSize: const Size(70,70),
                             ),
-                            onPressed: _setNumber2,
-                            child: const Text('10'),
+                            onPressed:() => _setNumber('.'),
+                            child: const Text('.'),
                           ),
-                          const SizedBox(width: 15),
+                          const SizedBox(width: 10),
                           TextButton(
                             style: TextButton.styleFrom(
-                                textStyle: const TextStyle(fontSize: 20),
-                                primary: Colors.white,
-                                backgroundColor: const Color.fromRGBO(109, 37, 166, 1),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10)
-                                ),
+                              textStyle: const TextStyle(fontSize: 20),
+                              primary: Colors.white,
+                              backgroundColor: themeSideSymbolButtons,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)
+                              ),
                               minimumSize: const Size(70,70),
                             ),
-                            onPressed: _setNumber2,
-                            child: const Text('10'),
+                            onPressed: _deleteValues,
+                            child: const Icon(
+                              Icons.backspace,
+                            ),
+
+                          ),
+                          const SizedBox(width: 10),
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              textStyle: const TextStyle(fontSize: 20),
+                              primary: Colors.white,
+                              backgroundColor: themeSideSymbolButtons,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)
+                              ),
+                              minimumSize: const Size(70,70),
+                            ),
+                            onPressed: _calculate,
+                            child: const Text('='),
                           ),
                         ],
                       ),
                     ],
                   ),
-                  const Spacer(),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      TextButton(
-                        style: TextButton.styleFrom(
-                            textStyle: const TextStyle(fontSize: 20),
-                            primary: Colors.white,
-                            backgroundColor: const Color.fromRGBO(241, 23, 115, 1),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)
-                            ),
-                          minimumSize: const Size(70,70),
-                        ),
-                        onPressed: _setSymbol,
-                        child: const Text('%'),
-                      ),
-                      const SizedBox(width: 15),
-                      TextButton(
-                        style: TextButton.styleFrom(
-                            textStyle: const TextStyle(fontSize: 20),
-                            primary: Colors.white,
-                            backgroundColor: const Color.fromRGBO(241, 23, 115, 1),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)
-                            ),
-                          minimumSize: const Size(70,70),
-                        ),
-                        onPressed: _setSymbol,
-                        child: const Text('x'),
-                      ),
-                      const SizedBox(width: 15),
-                      TextButton(
-                        style: TextButton.styleFrom(
-                            textStyle: const TextStyle(fontSize: 20),
-                            primary: Colors.white,
-                            backgroundColor: const Color.fromRGBO(241, 23, 115, 1),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)
-                            ),
-                          minimumSize: const Size(70,70),
-                        ),
-                        onPressed: _setSymbol,
-                        child: const Text('-'),
-                      ),
-                      const SizedBox(width: 15),
-                      TextButton(
-                        style: TextButton.styleFrom(
-                            textStyle: const TextStyle(fontSize: 20),
-                            primary: Colors.white,
-                            backgroundColor: const Color.fromRGBO(241, 23, 115, 1),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)
-                            ),
-                          minimumSize: const Size(70,70),
-                        ),
-                        onPressed: _setSymbol,
-                        child: const Text('+'),
-                      ),
-                      const SizedBox(width: 15),
-                      TextButton(
-                        style: TextButton.styleFrom(
-                            textStyle: const TextStyle(fontSize: 20),
-                            primary: Colors.white,
-                            backgroundColor: const Color.fromRGBO(241, 23, 115, 1),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)
-                            ),
-                          minimumSize: const Size(70,70),
-                        ),
-                        onPressed: _calculate,
-                        child: const Text('='),
-                      ),
-                    ],
-                  ),
-
                 ],
               ),
             ),
