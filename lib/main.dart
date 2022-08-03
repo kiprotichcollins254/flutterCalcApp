@@ -3,7 +3,8 @@
 // import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:math_expressions/math_expressions.dart';
-
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'advanced.dart';
 void main() {
   runApp(const MyApp());
 }
@@ -20,6 +21,11 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.green,
       ),
       home: const MyHomePage(title: 'MY ADVANCED CALCULATOR'),
+      initialRoute: '/',
+      routes: <String,WidgetBuilder>{
+        // '/' : (BuildContext context) => const MyHomePage(title: 'MY ADVANCED CALCULATOR'),
+        '/advanced':(BuildContext context) => const MyAdvancedPage(title: 'ADVANCED CALCULATOR')
+      },
     );
   }
 }
@@ -175,12 +181,33 @@ class _MyHomePageState extends State<MyHomePage> {
         }
   }
 
+  void _navigateApplication(int index){
+    if(index == 0){
+      Navigator.pushReplacementNamed(context, '/');
+    }
+    if(index == 1){
+      Navigator.pushReplacementNamed(context, '/advanced');
+    }
+    if(index == 2){
+      Navigator.pushReplacementNamed(context, '/');
+    }
+  }
+
 
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: bgThemeColor,
+      bottomNavigationBar: CurvedNavigationBar(
+        backgroundColor: bgThemeColor,
+        items: const <Widget>[
+          Icon(Icons.add, size: 30),
+          Icon(Icons.list, size: 30),
+          Icon(Icons.person, size: 30),
+        ],
+        onTap: _navigateApplication,
+      ),
       body: Container(
         padding: const EdgeInsets.all(20),
         margin: const EdgeInsets.only(top: 50),
@@ -210,7 +237,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
 
-            const SizedBox(height: 100),
+            const SizedBox(height: 50),
             Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
